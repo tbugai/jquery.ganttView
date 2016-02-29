@@ -11,6 +11,16 @@
 			font-size: 0.8em;
 			padding: 10px;
 		}
+
+    div.ganttview-block {
+      border-radius: 15px;
+      line-height: 2.1;
+    }
+
+    div.ganttview-block-text {
+      margin-left: 5px;
+    }
+
 	</style>
 	<title>jQuery Gantt</title>
 </head>
@@ -30,6 +40,9 @@
 			$("#ganttChart").ganttView({
 				data: ganttData,
 				slideWidth: 900,
+        cellTextFormatter: function(activity) {
+          return (Math.round((activity.end-activity.start)/(1000*60*60*24)) + 1) + " days";
+        },
 				behavior: {
 					onClick: function (data) {
 						var msg = "You clicked on an event: { start: " + data.start.toString("M/d/yyyy") + ", end: " + data.end.toString("M/d/yyyy") + " }";

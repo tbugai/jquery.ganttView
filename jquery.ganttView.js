@@ -14,6 +14,7 @@ cellWidth: number
 cellHeight: number
 slideWidth: number
 dataUrl: string
+cellTextFormatter: function
 behavior: {
 	clickable: boolean,
 	draggable: boolean,
@@ -48,6 +49,7 @@ behavior: {
       cellHeight: 31,
       slideWidth: 400,
       vHeaderWidth: 100,
+      cellTextFormatter: defaultCellTextFormatter,
       behavior: {
         clickable: true,
         draggable: true,
@@ -98,6 +100,10 @@ behavior: {
     }
   }
 
+  function defaultCellTextFormatter(activity, series, group) {
+    return DateUtils.daysBetween(activity.start, activity.end) + 1;
+  }
+
   var Chart = function(div, opts) {
     var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -118,7 +124,7 @@ behavior: {
       addHzHeader(slideDiv, dates, opts.cellWidth);
       addGrid(slideDiv, opts.data, dates, opts.cellWidth, opts.showWeekends, opts.showToday);
       addBlockContainers(slideDiv, opts.data);
-      addBlocks(slideDiv, opts.data, opts.cellWidth, opts.start);
+      addBlocks(slideDiv, opts); //opts.data, opts.cellWidth, opts.start);
       div.append(slideDiv);
       applyLastClass(div.parent());
     }
@@ -299,37 +305,37 @@ behavior: {
       div.append(blocksDiv);
     }
 
-    function addBlocks(div, data, cellWidth, start) {
+    function addBlocks(div, opts) {
       var rows = jQuery("div.ganttview-blocks div.ganttview-block-container", div);
       var rowIdx = 0;
-			for (var currentGroup of data) {
+			for (var currentGroup of opts.data) {
 				for (var currentSeries of currentGroup.series) {
 					for (var currentActivity of currentSeries.activities) {
-						jQuery(rows[rowIdx]).append(generateBlock(currentGroup, currentActivity, start, cellWidth));
+						jQuery(rows[rowIdx]).append(generateBlock(currentGroup, currentActivity, opts)); //opts.start, opts.cellWidth));
 					}
           rowIdx = rowIdx + 1;
         }
       }
     }
 
-		function generateBlock(data, series, start, cellWidth) {
-			var size = DateUtils.daysBetween(series.start, series.end) + 1;
-			var offset = DateUtils.daysBetween(start, series.start);
+		function generateBlock(data, activity, opts) {
+			var size = DateUtils.daysBetween(activity.start, activity.end) + 1;
+			var offset = DateUtils.daysBetween(opts.start, activity.start);
 			var block = jQuery("<div>", {
 				"class": "ganttview-block",
-				"title": series.name + ", " + size + " days",
+				"title": activity.name + ", " + size + " days",
 				"css": {
-					"width": ((size * cellWidth) - 9) + "px",
-					"margin-left": ((offset * cellWidth) + 3) + "px"
+					"width": ((size * opts.cellWidth) - 9) + "px",
+					"margin-left": ((offset * opts.cellWidth) + 3) + "px"
 				}
 			});
-			addBlockData(block, data, series);
-			if (series.color) {
-				block.css("background-color", series.color);
+			addBlockData(block, data, activity);
+			if (activity.color) {
+				block.css("background-color", activity.color);
 			}
 			block.append(jQuery("<div>", {
 				"class": "ganttview-block-text"
-			}).text(size));
+			}).html(opts.cellTextFormatter(activity)));
 
 			return block;
 		}
@@ -353,8 +359,9 @@ behavior: {
 
     return {
       render: render
-    };
+    }
   }
+
 
   var Behavior = function(div, opts) {
 
