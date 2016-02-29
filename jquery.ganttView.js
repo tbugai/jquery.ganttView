@@ -108,7 +108,7 @@ behavior: {
     var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     function render() {
-			resolveConflicts(opts.data);
+			prepareData(opts.data);
 			addVtHeader(div, opts.data, opts.cellHeight);
 
       var slideDiv = jQuery("<div>", {
@@ -155,22 +155,35 @@ behavior: {
 				return false;
 			}
 
-			if ((Date.parse(activity2.start) < Date.parse(activity1.start) && Date.parse(activity2.end) > Date.parse(activity1.start)) ||
-					(Date.parse(activity2.start) < Date.parse(activity1.end) && Date.parse(activity2.end) > Date.parse(activity1.end)) ||
-					(Date.parse(activity2.start) > Date.parse(activity1.start) && Date.parse(activity2.end) < Date.parse(activity1.end))) {
+			if ((activity2.start < activity1.start && activity2.end > activity1.start) ||
+					(activity2.start < activity1.end && activity2.end > activity1.end) ||
+					(activity2.start > activity1.start && activity2.end < activity1.end)) {
 				return true;
 			}
 			return false;
 		}
 
-		function resolveConflicts(data) {
+    function preprocessDate(activity) {
+      if (typeof(activity.start) != Date) {
+        activity.start = Date.parse(activity.start);
+      }
+      if (typeof(activity.end) != Date) {
+        activity.end = Date.parse(activity.end);
+      }
+    }
+
+		function prepareData(data) {
 			for (var currentGroup of data) {
 				for (var seriesIndex = 0; seriesIndex < currentGroup.series.length; seriesIndex++) {
 					var currentSeries = currentGroup.series[seriesIndex];
 					var conflicts = [];
 
 					for (var i = 0; i < currentSeries.activities.length; i++) {
+            preprocessDate(currentSeries.activities[i]);
+
 						for(var j = i + 1; j < currentSeries.activities.length; j++) {
+              preprocessDate(currentSeries.activities[j]);
+
 							if (isOverlapped(currentSeries.activities[i], currentSeries.activities[j])) {
 								conflicts.push(currentSeries.activities[j]);
 								currentSeries.activities.splice(j, 1);
@@ -474,8 +487,7 @@ behavior: {
       if (!start || !end) {
         return 0;
       }
-      start = Date.parse(start);
-      end = Date.parse(end);
+
       if (start.getYear() == 1901 || end.getYear() == 8099) {
         return 0;
       }
@@ -498,12 +510,7 @@ behavior: {
     getBoundaryDatesFromData: function(data, minDays) {
       var minStart = new Date();
       var maxEnd = new Date();
-      // for (var groupIndex = 0; groupIndex < data.length; groupIndex++) {
-			// 	var currentGroup = data[groupIndex];
-      //   for (var seriesIndex = 0; seriesIndex < currentGroup.series.length; seriesIndex++) {
-			// 		var currentSeries = currentGroup.series[seriesIndex];
-			// 		for (var activityIndex = 0; activityIndex < currentSeries.activities.length; activityIndex++) {
-			// 			var currentActivity = currentSeries.activities[activityIndex];
+
 			forEach(data, function( _, _, activity, groupIndex, seriesIndex, activityIndex) {
 				var start = Date.parse(activity.start);
         var end = Date.parse(activity.end)
