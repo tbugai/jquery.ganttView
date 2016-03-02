@@ -4,8 +4,8 @@ Copyright (c) 2010 JC Grubbs - jc.grubbs@devmynd.com
 MIT License Applies
 */
 
-div.ganttview-hzheader-month,
-div.ganttview-hzheader-day,
+div.ganttview-hzheader-group,
+div.ganttview-hzheader-column,
 div.ganttview-vtheader,
 div.ganttview-vtheader-item-name,
 div.ganttview-vtheader-series,
@@ -14,14 +14,16 @@ div.ganttview-grid-row-cell {
 	float: left;
 }
 
-div.ganttview-hzheader-month,
-div.ganttview-hzheader-day {
+div.ganttview-hzheader-group,
+div.ganttview-hzheader-column {
 	text-align: center;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 
 div.ganttview-grid-row-cell.last,
-div.ganttview-hzheader-day.last,
-div.ganttview-hzheader-month.last {
+div.ganttview-hzheader-column.last,
+div.ganttview-hzheader-group.last {
 	border-right: none;
 }
 
@@ -32,15 +34,15 @@ div.ganttview {
 
 /* Horizontal Header */
 
-div.ganttview-hzheader-month {
+div.ganttview-hzheader-group {
 	width: 60px;
 	height: 20px;
 	border-right: 1px solid #d0d0d0;
 	line-height: 20px;
 }
 
-div.ganttview-hzheader-day {
-	width: 20px;
+div.ganttview-hzheader-column {
+	/*width: 20px;*/
 	height: 20px;
 	border-right: 1px solid #f0f0f0;
 	border-top: 1px solid #d0d0d0;
